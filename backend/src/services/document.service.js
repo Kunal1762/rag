@@ -1,7 +1,31 @@
-const {chunkText}=require("./chunking.service");
+// src/services/document.service.js
+const { chunkText } = require('./chunking.service');
+const { embedText } = require('./embedding.service');
+const Chunk = require('../models/chunk.model');
+const crypto = require('crypto');
 
-const text="chunkText is now async — LangChain's splitter returns a Promise. Anywhere you call this function (in document.service.js), you'll need await chunkText(...) instead of a plain call. That's the one ripple effect outside this file.Same function name, same core input (text), same output shape (array of strings) — this is why isolating chunking logic into its own file was worth it. document.service.js doesn't know or care whether chunking happens via your hand-rolled recursion or LangChain internally — it just calls chunkText() and gets chunks back.chunkOverlap is now a real parameter, not something we'd bolt on later — LangChain gives you this for free. Overlap means consecutive chunks share some trailing/leading text, so an idea that spans a chunk boundary isn't completely lost in either chunk. This was on our stretch version list — you're getting it now essentially for free by using the library. Worth remembering when someone asks why 100 character overlap — the answer is: prevents context loss right at chunk boundaries, at the cost of slightly more storage/embedding calls since chunks now overlap."
+async function ingestDocument(title, text) {
+  const documentId = crypto.randomUUID();
 
-const chunks= await chunkText(text, 100, 10);
+  const chunks = await chunkText(text);
 
-console.log(chunks)
+  const chunkDocs = [];
+  for (const chunkContent of chunks) {
+    const vector = await embedText(chunkContent);
+    chunkDocs.push({
+      documentId,
+      documentTitle: title,
+      text: chunkContent,
+      vector,
+    });
+  }
+
+  const saved = await Chunk.insertMany(chunkDocs);
+
+  return {
+    documentId,
+    chunksCreated: saved.length,
+  };
+}
+
+module.exports = { ingestDocument };
