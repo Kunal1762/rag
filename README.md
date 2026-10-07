@@ -1,11 +1,11 @@
 # DocQA — RAG-based Document Q&A API
 
-A backend API that lets you upload your own text documents and ask questions about them, with answers grounded in your actual data instead of general LLM knowledge. Built as a learning project to understand Retrieval-Augmented Generation (RAG) from first principles — most core logic is hand-built rather than using high-level RAG frameworks, so every design decision is understood and defensible.
+A backend API that lets you upload text documents and ask questions about them, with answers grounded in your actual data instead of general LLM knowledge. This project is a learning-focused implementation of Retrieval-Augmented Generation (RAG) from first principles, with most of the core logic built manually so each design choice is deliberate and understandable.
 
 ## What it does
 
-1. **Ingest**: Submit text → it gets split into chunks → each chunk is embedded into a vector → stored in MongoDB
-2. **Query**: Ask a question → it's embedded the same way → compared against all stored chunks using cosine similarity → top matching chunks are retrieved → sent to an LLM along with the question → grounded answer returned, with source chunks cited
+1. **Ingest**: submit text → split it into chunks → embed each chunk → store it in MongoDB.
+2. **Query**: ask a question → embed the question → compare it against stored chunks using cosine similarity → retrieve the most relevant chunks → send them to an LLM with the question → return a grounded answer with source citations.
 
 ## Tech stack
 
@@ -15,38 +15,39 @@ A backend API that lets you upload your own text documents and ask questions abo
 - **Chunking**: LangChain's `RecursiveCharacterTextSplitter`
 - **Embeddings**: Google Gemini (`gemini-embedding-001`, 768 dimensions)
 - **LLM generation**: Google Gemini (`gemini-flash-lite-latest`, via `@google/genai`)
-- **Similarity search**: Hand-built cosine similarity (no vector DB yet — see Known Limitations)
+- **Similarity search**: hand-built cosine similarity (no vector DB yet — see Known Limitations)
 
 ## Architecture
 
-Layered architecture — controllers handle HTTP, services hold business logic, routes wire endpoints:
+This project follows a layered architecture: controllers handle HTTP requests, services contain business logic, and routes connect the API surface to the application.
 
+```text
 backend/
 ├── src/
-│ ├── config/
-│ │ └── db.js # MongoDB connection
-│ ├── models/
-│ │ └── chunk.model.js # Mongoose schema for stored chunks
-│ ├── controllers/
-│ │ ├── document.controller.js
-│ │ └── query.controller.js
-│ ├── services/
-│ │ ├── document.service.js # orchestrates: chunk → embed → save
-│ │ ├── query.service.js # orchestrates: embed question → search → ask LLM
-│ │ ├── chunking.service.js # text splitting (LangChain)
-│ │ ├── embedding.service.js # Gemini embeddings API calls
-│ │ ├── similarity.service.js # cosine similarity math, top-k search
-│ │ └── llm.service.js # Gemini generation API calls
-│ ├── routes/
-│ │ ├── document.routes.js
-│ │ └── query.routes.js
-│ ├── validators/ # zod schemas
-│ └── app.js
+│   ├── config/
+│   │   └── db.js                      # MongoDB connection
+│   ├── models/
+│   │   └── chunk.model.js             # Mongoose schema for stored chunks
+│   ├── controllers/
+│   │   ├── document.controller.js
+│   │   └── query.controller.js
+│   ├── services/
+│   │   ├── document.service.js         # chunk → embed → save
+│   │   ├── query.service.js            # embed question → search → ask LLM
+│   │   ├── chunking.service.js         # text splitting (LangChain)
+│   │   ├── embedding.service.js        # Gemini embeddings API calls
+│   │   ├── similarity.service.js       # cosine similarity math, top-k search
+│   │   └── llm.service.js             # Gemini generation API calls
+│   ├── routes/
+│   │   ├── document.routes.js
+│   │   └── query.routes.js
+│   ├── validators/                    # Zod schemas
+│   └── app.js
 ├── .env
 └── server.js
+```
 
-
-**Why this split:** `chunking.service.js` and `similarity.service.js` are pure logic — no DB or API calls — making them independently testable and easy to swap out later (e.g. replacing manual similarity search with a real vector index) without touching the rest of the app.
+**Why this split:** `chunking.service.js` and `similarity.service.js` are pure logic layers with no database or API calls, which makes them independently testable and easy to swap later. For example, you could replace the manual similarity search with a real vector index without touching the rest of the application.
 
 ## API Endpoints
 
@@ -91,16 +92,38 @@ Asks a question against all ingested documents.
 
 ## Setup
 
-1. Clone the repo, `cd backend`
-2. `npm install`
-3. Create `.env` in `backend/`:
+1. Clone the repo and move into the backend folder:
 
-MONGO_URI=your_mongodb_connection_string
-GEMINI_API_KEY=your_gemini_api_key
-PORT=3000
+   ```bash
+   cd backend
+   ```
 
-4. Get a free Gemini API key from [Google AI Studio](https://aistudio.google.com/app/apikey)
-5. `npm run dev` (or `node server.js`)
+2. Install dependencies:
+
+   ```bash
+   npm install
+   ```
+
+3. Create a `.env` file inside `backend/` with the following values:
+
+   ```env
+   MONGO_URI=your_mongodb_connection_string
+   GEMINI_API_KEY=your_gemini_api_key
+   PORT=3000
+   ```
+
+4. Get a free Gemini API key from [Google AI Studio](https://aistudio.google.com/app/apikey).
+5. Start the app:
+
+   ```bash
+   npm run dev
+   ```
+
+   You can also run:
+
+   ```bash
+   node server.js
+   ```
 
 ## Design decisions (and why)
 
@@ -122,4 +145,4 @@ PORT=3000
 
 ## What this project demonstrates
 
-Built to go beyond "called an embeddings API and wired it to a vector DB" — every core piece (chunking strategy, cosine similarity math, prompt design against hallucination) was implemented and tested with real evidence (documented test results comparing relevant vs. irrelevant query scores) rather than assumed to work because a library handled it.
+This project goes beyond simply calling an embedding API and wiring it to a database. It shows the core mechanics behind a working RAG flow: chunking strategy, cosine similarity search, retrieval logic, prompt design, and grounding behavior. The goal is to understand these pieces deeply rather than relying on a black-box framework to hide the decisions.
