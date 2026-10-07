@@ -1,4 +1,6 @@
 const express=require("express")
+const documentRoutes = require('./routes/document.routes');
+const queryRoutes = require('./routes/query.routes');
 
 const app=express()
 
