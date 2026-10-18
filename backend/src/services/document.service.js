@@ -4,10 +4,10 @@ const { embedText } = require('./embedding.service');
 const Chunk = require('../models/chunk.model');
 const crypto = require('crypto');
 
-async function ingestDocument(title, text) {
+async function ingestDocument(title, text, { chunkSize, chunkOverlap } = {}) {
   const documentId = crypto.randomUUID();
 
-  const chunks = await chunkText(text);
+   const chunks = await chunkText(text, chunkSize, chunkOverlap);
 
   const chunkDocs = [];
   for (const chunkContent of chunks) {

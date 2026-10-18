@@ -23,16 +23,16 @@ function cosineSimilarity(a, b) {
   return dot / (magA * magB);
 }
 
-function findTopKSimilar(queryVector, candidates, k = 3) {
-  // candidates: array of { text, vector, ...otherFields }
+function findTopKSimilar(queryVector, candidates, k = 3, minScore = 0.5) {
   const scored = candidates.map(candidate => ({
     ...candidate,
     score: cosineSimilarity(queryVector, candidate.vector),
   }));
 
-  scored.sort((a, b) => b.score - a.score); // highest similarity first
-
-  return scored.slice(0, k);
+  return scored
+    .filter(c => c.score >= minScore)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, k);
 }
 
 module.exports = { cosineSimilarity, findTopKSimilar };

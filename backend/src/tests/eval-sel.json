@@ -1,0 +1,15 @@
+[
+  { "question": "How many layers does the encoder in the base Transformer have?", "expectedKeywords": ["identical layers"] },
+  { "question": "Why is the dot product scaled by the square root of d_k?", "expectedKeywords": ["small gradients"] },
+  { "question": "How many attention heads does the base model use and what is the dimension of each head?", "expectedKeywords": ["parallel attention layers"] },
+  { "question": "What BLEU score did the big Transformer get on WMT 2014 English-to-German?", "expectedKeywords": ["28.4"] },
+  { "question": "What BLEU score does the abstract report for English-to-French?", "expectedKeywords": ["41.8"] },
+  { "question": "Why did the authors choose sinusoidal positional encodings over learned ones?", "expectedKeywords": ["extrapolate"] },
+  { "question": "What optimizer and learning rate schedule were used for training?", "expectedKeywords": ["warmup"] },
+  { "question": "How long did training take and on what hardware?", "expectedKeywords": ["P100"] },
+  { "question": "What regularization techniques did the authors use?", "expectedKeywords": ["label smoothing"] },
+  { "question": "How does the decoder differ from the encoder?", "expectedKeywords": ["third sub-layer"] },
+  { "question": "How does self-attention compare to recurrent layers in computational cost?", "expectedKeywords": ["faster than recurrent"] },
+  { "question": "What is the capital of France?", "expectedKeywords": [] },
+  { "question": "How does BERT use masked language modeling during pre-training?", "expectedKeywords": [] }
+]

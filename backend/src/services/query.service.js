@@ -11,6 +11,13 @@ async function answerQuestion(question) {
 
   const topChunks = findTopKSimilar(questionVector, allChunks, 3);
 
+  if (topChunks.length === 0) {
+  return {
+    answer: "I couldn't find anything relevant to that question in your documents.",
+    sources: [],
+  };
+}
+
   const context = topChunks.map(c => c.text).join('\n\n');
 
   const answer = await askLLM(question, context);
