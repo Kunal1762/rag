@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const mongoose = require('mongoose');
 const Chunk = require('../models/chunk.model');
+const Document = require('../models/document.model');
 const { ingestDocument } = require('../services/document.service');
 const { embedText } = require('../services/embedding.service');
 const { findTopKSimilar } = require('../services/similarity.service');
@@ -30,7 +31,10 @@ async function main() {
   for (const { chunkSize, chunkOverlap } of CONFIGS) {
     console.log(`\n=== chunkSize=${chunkSize}, overlap=${chunkOverlap} ===`);
 
-    await Chunk.deleteMany({ documentTitle: TITLE });
+    const old = await Document.find({ title: TITLE }).select('_id').lean();
+    const ids = old.map(d => d._id);
+    await Chunk.deleteMany({ documentId: { $in: ids } });
+    await Document.deleteMany({ _id: { $in: ids } });
     const { chunksCreated } = await ingestDocument(TITLE, text, { chunkSize, chunkOverlap });
     const allChunks = await Chunk.find({}).lean();
 

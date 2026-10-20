@@ -26,6 +26,7 @@ async function answerQuestion(question) {
     answer,
     sources: topChunks.map(c => ({
       documentTitle: c.documentTitle,
+      chunkIndex: c.chunkIndex,
       text: c.text,
       score: c.score,
     })),
