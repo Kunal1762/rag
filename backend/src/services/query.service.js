@@ -4,7 +4,7 @@ const { findTopKSimilar } = require('./similarity.service');
 const { askLLM } = require('./llm.service');
 const Chunk = require('../models/chunk.model');
 
-async function answerQuestion(question) {
+async function answerQuestion(question, documentId) {
   const questionVector = await embedText(question);
 
   const filter = documentId ? { documentId } : {};
