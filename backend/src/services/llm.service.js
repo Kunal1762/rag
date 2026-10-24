@@ -1,4 +1,5 @@
 // src/services/llm.service.js
+const { withRetry } = require('../utils/retry');
 const { GoogleGenAI } = require('@google/genai');
 
 const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_GENAI_API_KEY });
@@ -10,13 +11,15 @@ ${context}
 
 Question: ${question}
 
-Answer the question using only the context above. If the context doesn't contain enough information to answer, say so clearly instead of guessing.
+Answer the question using only the context above. If the context doesn't contain enough information to answer, say so clearly instead of guessing. If different parts of the context give conflicting values, report each value and point out the conflict.
 `;
 
-  const response = await ai.models.generateContent({
-    model: 'gemini-flash-lite-latest',
-    contents: prompt,
-  });
+  const response = await withRetry(() =>
+    ai.models.generateContent({
+      model: 'gemini-flash-lite-latest',
+      contents: prompt,
+    })
+  );
 
   return response.text;
 }

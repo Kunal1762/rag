@@ -7,7 +7,8 @@ const Chunk = require('../models/chunk.model');
 async function answerQuestion(question) {
   const questionVector = await embedText(question);
 
-  const allChunks = await Chunk.find({}).lean();
+  const filter = documentId ? { documentId } : {};
+  const allChunks = await Chunk.find(filter).lean();
 
   const topChunks = findTopKSimilar(questionVector, allChunks, 3);
 

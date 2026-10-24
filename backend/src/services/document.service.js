@@ -3,10 +3,11 @@ const { chunkText } = require('./chunking.service');
 const { embedText } = require('./embedding.service');
 const Chunk = require('../models/chunk.model');
 const Document = require('../models/document.model');
+const { HttpError } = require('../utils/httpError');
 
 async function ingestDocument(title, text, { chunkSize = 1000, chunkOverlap = 100 } = {}) {
   const pieces = await chunkText(text, chunkSize, chunkOverlap);
-  if (pieces.length === 0) throw new Error('Document has no content to index');
+  if (pieces.length === 0) throw new HttpError(400, 'Document has no content to index');
 
   // embed everything BEFORE touching the database: if an API call fails, nothing was written
   const vectors = [];
